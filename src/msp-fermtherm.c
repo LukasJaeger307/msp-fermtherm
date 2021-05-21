@@ -15,6 +15,7 @@
  */
 
 #include <msp430g2553.h>
+#include <stdlib.h>
 
 // IO definitions
 #define BUTTON BIT3
@@ -22,9 +23,20 @@
 
 // Timer definitions
 #define TIMER_DELAY (62499) // Equal to 0.5 seconds
-//#define TIMER_DELAY (10)
 #define ENABLE_TIMER (TASSEL_2 | ID_3 | MC_1 |TACLR)
 
+// UART definitions
+#define RXP (BIT1)
+#define TXP (BIT2)
+
+static void uart_tx_string(char const * const s){
+	size_t i = 0;
+	while(s[i] != 0x00) {
+		while (UCA0STAT & UCBUSY); 
+		UCA0TXBUF = s[i]; 
+		i++;
+	}
+}
 
 int main (void)
 {	
@@ -55,6 +67,19 @@ int main (void)
 	// Enable timer interrupt
 	TACCTL0 = CCIE;
 
+	// Select UART Pins
+	P1SEL = RXP + TXP;
+	P1SEL2 = RXP + TXP;
+	// Set clock
+	UCA0CTL1 |= UCSSEL_2;
+	// Set 9600 baud at 1MHz
+	UCA0BR0 = 104;
+	UCA0BR1 = 0;
+	// Set modulation
+	UCA0MCTL = UCBRS0;
+	// Start state machine
+	UCA0CTL1 &= ~UCSWRST;
+
 	// Globally enable interrupts
 	_BIS_SR(GIE);
 
@@ -84,6 +109,9 @@ static void __attribute__((__interrupt__(PORT1_VECTOR))) p1_isr(void) {
 			
 			// Activate LED
 			P1OUT |= LED2;
+
+			// Print a debug string
+			uart_tx_string("We are here to drink your beer!\r\n");
 
 			// Enable and start timer
 			TA0CTL |= ENABLE_TIMER;
