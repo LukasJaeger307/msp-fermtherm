@@ -59,6 +59,10 @@ int main (void)
 	while(1);
 }
 
+// Semaphore-ish variable that stores, whether or not the device is just
+// displaying temperatures
+static volatile int is_inactive = 1;
+
 // ISR for port 1 
 static void __attribute__((__interrupt__(PORT1_VECTOR))) p1_isr(void) {
 	// Check if button push caused it
@@ -66,12 +70,16 @@ static void __attribute__((__interrupt__(PORT1_VECTOR))) p1_isr(void) {
 		// Clear flag
 		P1IFG = P1IFG & ~BUTTON;
 
-		// Activate LED
-		P1OUT |= LED2;
+		// Only start activity if it does not yet happen
+		if (is_inactive) {
+			is_inactive = 0;
+			// Activate LED
+			P1OUT |= LED2;
 
-		// Enable and start timer
-		TA0CTL |= ENABLE_TIMER;
-		TACCR0 =  TIMER_DELAY;
+			// Enable and start timer
+			TA0CTL |= ENABLE_TIMER;
+			TACCR0 =  TIMER_DELAY;
+		}
 	}
 }
 
@@ -82,4 +90,6 @@ static void __attribute__((__interrupt__(TIMER1_A0_VECTOR))) ta0_isr(void) {
 	P1OUT &= ~LED2;
 	// Disable timer
 	TACCR0 = 0;
+	// Deactivate stuff
+	is_inactive = 1;
 }
