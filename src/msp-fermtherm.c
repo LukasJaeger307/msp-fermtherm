@@ -22,13 +22,16 @@
 
 // Timer definitions
 #define TIMER_DELAY (62499) // Equal to 0.5 seconds
+//#define TIMER_DELAY (10)
 #define ENABLE_TIMER (TASSEL_2 | ID_3 | MC_1 |TACLR)
+
 
 int main (void)
 {	
 	// Disable WD timer
 	WDTCTL = WDTPW + WDTHOLD;
 
+	// TODO: Clock down
 	// Set clocks
 	BCSCTL1 = CALBC1_1MHZ;
 	DCOCTL = CALDCO_1MHZ;
@@ -55,6 +58,9 @@ int main (void)
 	// Globally enable interrupts
 	_BIS_SR(GIE);
 
+	// Go to LPM4
+	LPM4;
+
 	// Loop forever
 	while(1);
 }
@@ -72,7 +78,10 @@ static void __attribute__((__interrupt__(PORT1_VECTOR))) p1_isr(void) {
 
 		// Only start activity if it does not yet happen
 		if (is_inactive) {
+			// Wake up
+			LPM4_EXIT;
 			is_inactive = 0;
+			
 			// Activate LED
 			P1OUT |= LED2;
 
@@ -83,7 +92,6 @@ static void __attribute__((__interrupt__(PORT1_VECTOR))) p1_isr(void) {
 	}
 }
 
-
 // ISR for TimerA0
 static void __attribute__((__interrupt__(TIMER1_A0_VECTOR))) ta0_isr(void) {
 	// Disable LED2
@@ -92,4 +100,6 @@ static void __attribute__((__interrupt__(TIMER1_A0_VECTOR))) ta0_isr(void) {
 	TACCR0 = 0;
 	// Deactivate stuff
 	is_inactive = 1;
+	// And go back to LPM4
+	LPM4;
 }
