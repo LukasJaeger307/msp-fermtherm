@@ -23,7 +23,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CROSS_COMPILE) -c -o $@ $< $(CFLAGS)
 	
 $(BINDIR)/$(P) : folders $(OBJECTS)
-	$(CROSS_COMPILE) -L$(TOOLCHAINFLAGS) $(OBJDIR)/$(P).o $(MACHINEFLAGS) -o $(BINDIR)/$(P)
+	$(CROSS_COMPILE) -L$(TOOLCHAINFLAGS) $(OBJECTS) $(MACHINEFLAGS) -o $(BINDIR)/$(P)
 		
 $(BINDIR):
 	mkdir $(BINDIR)

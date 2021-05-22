@@ -16,6 +16,8 @@
 
 #include <msp430g2553.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include "ds18b20.h"
 
 // IO definitions
 #define BUTTON BIT3
@@ -110,8 +112,14 @@ static void __attribute__((__interrupt__(PORT1_VECTOR))) p1_isr(void) {
 			// Activate LED
 			P1OUT |= LED2;
 
+			// Get temp and print
+			float temperature = ds_get_temperature(); 
 			// Print a debug string
-			uart_tx_string("We are here to drink your beer!\r\n");
+			char string [6];
+			sprintf(string, "%u.%02u", (int) temperature, (int) ((temperature - (float)((int)(temperature))) * 100));
+			uart_tx_string("Temperature: ");
+			uart_tx_string(string);
+			uart_tx_string("\r\n");
 
 			// Enable and start timer
 			TA0CTL |= ENABLE_TIMER;
