@@ -2,26 +2,26 @@
 #include <stdint.h>
 
 static void ds_initialize(){
-	P1DIR |= DS18B20_PIN;
-	P1OUT &= ~DS18B20_PIN;
+	DS18B20_PORTCONF |= DS18B20_PIN;
+	DS18B20_PORT &= ~DS18B20_PIN;
 	__delay_cycles(500);
-	P1OUT |= DS18B20_PIN;
-	P1DIR &= ~DS18B20_PIN;
+	DS18B20_PORT |= DS18B20_PIN;
+	DS18B20_PORTCONF &= ~DS18B20_PIN;
 	__delay_cycles(500);
 }
 
 
 static void ds_send_char(uint8_t data){
 	for (uint8_t i = 0; i < 8; i++){
-		P1DIR |= DS18B20_PIN;
-		P1OUT &= ~DS18B20_PIN;
+		DS18B20_PORTCONF |= DS18B20_PIN;
+		DS18B20_PORT &= ~DS18B20_PIN;
 		__delay_cycles(2);
 		if ((data & 0x01) != 0x00){
-			P1OUT |= DS18B20_PIN;	
+			DS18B20_PORT |= DS18B20_PIN;	
 		}
 		__delay_cycles(60);
-		P1OUT |= DS18B20_PIN;
-		P1DIR &= ~DS18B20_PIN;			
+		DS18B20_PORT |= DS18B20_PIN;
+		DS18B20_PORTCONF &= ~DS18B20_PIN;			
 		data >>=1;
 	}
 }
@@ -29,11 +29,11 @@ static void ds_send_char(uint8_t data){
 
 static void ds_read(uint16_t * const data){
 	for(uint8_t i = 0; i < 16; i++){
-		P1DIR |= DS18B20_PIN;
-		P1OUT &= ~DS18B20_PIN;
+		DS18B20_PORTCONF |= DS18B20_PIN;
+		DS18B20_PORT &= ~DS18B20_PIN;
 		__delay_cycles(2);
-		P1OUT |= DS18B20_PIN;
-		P1DIR &= ~DS18B20_PIN;
+		DS18B20_PORT |= DS18B20_PIN;
+		DS18B20_PORTCONF &= ~DS18B20_PIN;
 		__delay_cycles(8);
 		if(P1IN & DS18B20_PIN){
 			*data |= 0x8000;
