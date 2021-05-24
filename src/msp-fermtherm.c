@@ -43,8 +43,8 @@ int main (void)
 
 	// TODO: Clock down
 	// Set clocks
-	BCSCTL1 = CALBC1_1MHZ;
-	DCOCTL = CALDCO_1MHZ;
+	BCSCTL1 = 0;//CALBC1_1MHZ;
+	DCOCTL = 0; //CALDCO_1MHZ;
 	
 	// Make button pin input
 	P1DIR &= ~BUTTON;
@@ -71,7 +71,7 @@ int main (void)
 	// Set clock
 	UCA0CTL1 |= UCSSEL_2;
 	// Set 9600 baud at 1MHz
-	UCA0BR0 = 104;
+	UCA0BR0 = 0x0A;
 	UCA0BR1 = 0;
 	// Set modulation
 	UCA0MCTL = UCBRS0;
