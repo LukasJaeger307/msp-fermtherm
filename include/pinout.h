@@ -23,4 +23,10 @@
 #define DS18B20_PORTCONF (P1DIR)
 #define DS18B20_PIN (BIT0)
 
+// UART
+#define UART_PORT_CONF (P1SEL)
+#define UART_PORT_CONF2 (P1SEL2)
+#define UART_RX_PIN (BIT1)
+#define UART_TX_PIN (BIT2)
+
 #endif // PINOUT_H_

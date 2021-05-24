@@ -27,10 +27,6 @@
 #define TIMER_DELAY (62499) // Equal to 0.5 seconds
 #define ENABLE_TIMER (TASSEL_2 | ID_3 | MC_1 |TACLR)
 
-// UART definitions
-#define RXP (BIT1)
-#define TXP (BIT2)
-
 static void uart_tx_string(char const * const s){
 	size_t i = 0;
 	while(s[i] != 0x00) {
@@ -70,8 +66,8 @@ int main (void)
 	TACCTL0 = CCIE;
 
 	// Select UART Pins
-	P1SEL = RXP + TXP;
-	P1SEL2 = RXP + TXP;
+	UART_PORT_CONF = UART_RX_PIN + UART_TX_PIN;
+	UART_PORT_CONF2 = UART_RX_PIN + UART_TX_PIN;
 	// Set clock
 	UCA0CTL1 |= UCSSEL_2;
 	// Set 9600 baud at 1MHz
