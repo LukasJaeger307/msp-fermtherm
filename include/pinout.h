@@ -14,14 +14,13 @@
  * along with msp-fermtherm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _DS18B20_H_
-#define _DS18B20_H_
-
-#include <msp430g2553.h>
-#include "pinout.h"
-
-float ds_get_temperature();
-
-#endif //_DS18B20_H_
+#ifndef _PINOUT_H_
+#define _PINOUT_H_
 
 
+// DS18B20
+#define DS18B20_PORT (P1OUT)
+#define DS18B20_PORTCONF (P1DIR)
+#define DS18B20_PIN (BIT0)
+
+#endif // PINOUT_H_
