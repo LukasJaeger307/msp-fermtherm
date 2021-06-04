@@ -24,7 +24,7 @@
 #define LED2 BIT6
 
 // Timer definitions
-#define TIMER_DELAY (62499) // Equal to 0.5 seconds
+#define TIMER_DELAY (6249) // Equal to 0.5 seconds
 #define ENABLE_TIMER (TASSEL_2 | ID_3 | MC_1 |TACLR)
 
 static void uart_tx_string(char const * const s){
@@ -36,6 +36,231 @@ static void uart_tx_string(char const * const s){
 	}
 }
 
+static void show_temperature(float temp) {
+	// Reset it all
+	P1OUT = 0x00;
+	P2OUT = 0x00;
+	// Too cold to ferment anything
+	if (temp < 3.0) {
+		for (size_t i = 0; i < 10; i++) {
+			YEAST_LAGER_PORT |= YEAST_LAGER_BIT;
+			RANGE_LOW_PORT |= RANGE_LOW_BIT;
+			TEMP_LOW_PORT |= TEMP_LOW_BIT;
+			__delay_cycles(10000);
+			YEAST_LAGER_PORT &= ~YEAST_LAGER_BIT;
+			RANGE_LOW_PORT &= ~RANGE_LOW_BIT;
+			TEMP_LOW_PORT &= ~TEMP_LOW_BIT;
+			__delay_cycles(10000);
+		}
+	} 
+	// Good enough for Lager yeast
+	else if (temp < 15.0) {
+		YEAST_LAGER_PORT |= YEAST_LAGER_BIT;
+		if (temp < 7.0) {
+			// Low Range
+			RANGE_LOW_PORT |= RANGE_LOW_BIT;
+			if (temp < 4.0) {
+				// Low Temperature
+				TEMP_LOW_PORT |= TEMP_LOW_BIT;
+			}
+			else if (temp < 5.0) {
+				// Mid low Temperature
+				TEMP_MIDLOW_PORT |= TEMP_MIDLOW_BIT;
+			}
+			else if (temp < 6.0) {
+				// Mid high Temperature
+				TEMP_MIDHIGH_PORT |= TEMP_MIDHIGH_BIT;
+			}
+			else {
+				// High Temperature
+				TEMP_HIGH_PORT |= TEMP_HIGH_BIT;
+			}
+		}
+		else if (temp < 11.0) {
+			// Mid Range
+			RANGE_MID_PORT |= RANGE_MID_BIT;
+			if (temp < 8.0) {
+				// Low Temperature
+				TEMP_LOW_PORT |= TEMP_LOW_BIT;
+			}
+			else if (temp < 9.0) {
+				// Mid low Temperature
+				TEMP_MIDLOW_PORT |= TEMP_MIDLOW_BIT;
+			}
+			else if (temp < 10.0) {
+				// Mid high Temperature
+				TEMP_MIDHIGH_PORT |= TEMP_MIDHIGH_BIT;
+			}
+			else {
+				// High Temperature
+				TEMP_HIGH_PORT |= TEMP_HIGH_BIT;
+			}
+		}
+		else {
+			// High Range
+			RANGE_HIGH_PORT |= RANGE_HIGH_BIT;
+			if (temp < 12.0) {
+				// Low Temperature
+				TEMP_LOW_PORT |= TEMP_LOW_BIT;
+			}
+			else if (temp < 13.0) {
+				// Mid low Temperature
+				TEMP_MIDLOW_PORT |= TEMP_MIDLOW_BIT;
+			}
+			else if (temp < 14.0) {
+				// Mid high Temperature
+				TEMP_MIDHIGH_PORT |= TEMP_MIDHIGH_BIT;
+			}
+			else {
+				// High Temperature
+				TEMP_HIGH_PORT |= TEMP_HIGH_BIT;
+			}
+		}
+	}
+	// Good enough for Ale yeast
+	else if (temp < 27.0) {
+		YEAST_ALE_PORT |= YEAST_ALE_BIT;	
+		if (temp < 19.0) {
+			// Low Range
+			RANGE_LOW_PORT |= RANGE_LOW_BIT;
+			if (temp < 16.0) {
+				// Low Temperature
+				TEMP_LOW_PORT |= TEMP_LOW_BIT;
+			}
+			else if (temp < 17.0) {
+				// Mid low Temperature
+				TEMP_MIDLOW_PORT |= TEMP_MIDLOW_BIT;
+			}
+			else if (temp < 18.0) {
+				// Mid high Temperature
+				TEMP_MIDHIGH_PORT |= TEMP_MIDHIGH_BIT;
+			}
+			else {
+				// High Temperature
+				TEMP_HIGH_PORT |= TEMP_HIGH_BIT;
+			}
+		}
+		else if (temp < 23.0) {
+			// Mid Range
+			RANGE_MID_PORT |= RANGE_MID_BIT;
+			if (temp < 20.0) {
+				// Low Temperature
+				TEMP_LOW_PORT |= TEMP_LOW_BIT;
+			}
+			else if (temp < 21.0) {
+				// Mid low Temperature
+				TEMP_MIDLOW_PORT |= TEMP_MIDLOW_BIT;
+			}
+			else if (temp < 22.0) {
+				// Mid high Temperature
+				TEMP_MIDHIGH_PORT |= TEMP_MIDHIGH_BIT;
+			}
+			else {
+				// High Temperature
+				TEMP_HIGH_PORT |= TEMP_HIGH_BIT;
+			}
+		}
+		else {
+			// High Range
+			RANGE_HIGH_PORT |= RANGE_HIGH_BIT;
+			if (temp < 24.0) {
+				// Low Temperature
+				TEMP_LOW_PORT |= TEMP_LOW_BIT;
+			}
+			else if (temp < 25.0) {
+				// Mid low Temperature
+				TEMP_MIDLOW_PORT |= TEMP_MIDLOW_BIT;
+			}
+			else if (temp < 26.0) {
+				// Mid high Temperature
+				TEMP_MIDHIGH_PORT |= TEMP_MIDHIGH_BIT;
+			}
+			else {
+				// High Temperature
+				TEMP_HIGH_PORT |= TEMP_HIGH_BIT;
+			}
+		}
+	}
+	// Good enough for Kveik yeas
+	else if (temp < 39.0) {
+		YEAST_KVEIK_PORT = YEAST_KVEIK_BIT;
+		if (temp < 31.0) {
+			// Low Range
+			RANGE_LOW_PORT |= RANGE_LOW_BIT;
+			if (temp < 28.0) {
+				// Low Temperature
+				TEMP_LOW_PORT |= TEMP_LOW_BIT;
+			}
+			else if (temp < 29.0) {
+				// Mid low Temperature
+				TEMP_MIDLOW_PORT |= TEMP_MIDLOW_BIT;
+			}
+			else if (temp < 30.0) {
+				// Mid high Temperature
+				TEMP_MIDHIGH_PORT |= TEMP_MIDHIGH_BIT;
+			}
+			else {
+				// High Temperature
+				TEMP_HIGH_PORT |= TEMP_HIGH_BIT;
+			}
+		}
+		else if (temp < 35.0) {
+			// Mid Range
+			RANGE_MID_PORT |= RANGE_MID_BIT;
+			if (temp < 32.0) {
+				// Low Temperature
+				TEMP_LOW_PORT |= TEMP_LOW_BIT;
+			}
+			else if (temp < 33.0) {
+				// Mid low Temperature
+				TEMP_MIDLOW_PORT |= TEMP_MIDLOW_BIT;
+			}
+			else if (temp < 34.0) {
+				// Mid high Temperature
+				TEMP_MIDHIGH_PORT |= TEMP_MIDHIGH_BIT;
+			}
+			else {
+				// High Temperature
+				TEMP_HIGH_PORT |= TEMP_HIGH_BIT;
+			}
+		}
+		else {
+			// High Range
+			RANGE_HIGH_PORT |= RANGE_HIGH_BIT;
+			if (temp < 36.0) {
+				// Low Temperature
+				TEMP_LOW_PORT |= TEMP_LOW_BIT;
+			}
+			else if (temp < 37.0) {
+				// Mid low Temperature
+				TEMP_MIDLOW_PORT |= TEMP_MIDLOW_BIT;
+			}
+			else if (temp < 38.0) {
+				// Mid high Temperature
+				TEMP_MIDHIGH_PORT |= TEMP_MIDHIGH_BIT;
+			}
+			else {
+				// High Temperature
+				TEMP_HIGH_PORT |= TEMP_HIGH_BIT;
+			}
+		}
+	}
+	// Too hot to ferment anything
+	else {
+		for (size_t i = 0; i < 10; i++) {
+			YEAST_KVEIK_PORT |= YEAST_KVEIK_BIT;
+			RANGE_HIGH_PORT |= RANGE_HIGH_BIT;
+			TEMP_HIGH_PORT |= TEMP_HIGH_BIT;
+			__delay_cycles(10000);
+			YEAST_KVEIK_PORT &= ~YEAST_KVEIK_BIT;
+			RANGE_HIGH_PORT &= ~RANGE_HIGH_BIT;
+			TEMP_HIGH_PORT &= ~TEMP_HIGH_BIT;
+		__delay_cycles(10000);
+	}
+	}
+
+}
+
 int main (void)
 {	
 	// Disable WD timer
@@ -43,8 +268,8 @@ int main (void)
 
 	// TODO: Clock down
 	// Set clocks
-	BCSCTL1 = CALBC1_1MHZ;
-	DCOCTL = CALDCO_1MHZ;
+	BCSCTL1 = 0;//CALBC1_1MHZ;
+	DCOCTL = 0; //CALDCO_1MHZ;
 	
 	// Make button pin input
 	P1DIR &= ~BUTTON;
@@ -59,9 +284,6 @@ int main (void)
 	// Enable interrupt for button
 	P1IE |= BUTTON;
 
-	// Enable LED2
-	P1DIR |= LED2;
-		
 	// Enable timer interrupt
 	TACCTL0 = CCIE;
 
@@ -71,15 +293,24 @@ int main (void)
 	// Set clock
 	UCA0CTL1 |= UCSSEL_2;
 	// Set 9600 baud at 1MHz
-	UCA0BR0 = 104;
+	UCA0BR0 = 0x0A;
 	UCA0BR1 = 0;
 	// Set modulation
 	UCA0MCTL = UCBRS0;
 	// Start state machine
 	UCA0CTL1 &= ~UCSWRST;
 
+	// Make all temperature pins outputs
+	P1DIR |= TEMPLEDS_P1;
+ 	P2DIR |= TEMPLEDS_P2;	
+	
 	// Globally enable interrupts
-	_BIS_SR(GIE);
+	//_BIS_SR(GIE);
+
+	for (float temp = 2.5; temp < 40.0; temp+=1.0) {
+		show_temperature(temp);
+		__delay_cycles(100000);
+	}
 
 	// Go to LPM4
 	LPM4;
