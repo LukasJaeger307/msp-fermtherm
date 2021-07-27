@@ -21,11 +21,13 @@
 
 // IO definitions
 #define BUTTON BIT3
-#define LED2 BIT6
 
 // Timer definitions
 #define TIMER_DELAY (6249) // Equal to 0.5 seconds
 #define ENABLE_TIMER (TASSEL_2 | ID_3 | MC_1 |TACLR)
+
+// Some magic numbers
+#define FLASHES (10)
 
 static void uart_tx_string(char const * const s){
 	size_t i = 0;
@@ -42,7 +44,7 @@ static void show_temperature(float temp) {
 	P2OUT = 0x00;
 	// Too cold to ferment anything
 	if (temp < 3.0) {
-		for (size_t i = 0; i < 10; i++) {
+		for (size_t i = 0; i < FLASHES; i++) {
 			YEAST_LAGER_PORT |= YEAST_LAGER_BIT;
 			RANGE_LOW_PORT |= RANGE_LOW_BIT;
 			TEMP_LOW_PORT |= TEMP_LOW_BIT;
@@ -247,7 +249,7 @@ static void show_temperature(float temp) {
 	}
 	// Too hot to ferment anything
 	else {
-		for (size_t i = 0; i < 10; i++) {
+		for (size_t i = 0; i < FLASHES; i++) {
 			YEAST_KVEIK_PORT |= YEAST_KVEIK_BIT;
 			RANGE_HIGH_PORT |= RANGE_HIGH_BIT;
 			TEMP_HIGH_PORT |= TEMP_HIGH_BIT;
@@ -304,19 +306,30 @@ int main (void)
 	P1DIR |= TEMPLEDS_P1;
  	P2DIR |= TEMPLEDS_P2;	
 	
+
+	/*for (float temp = 2.5; temp < 40.0; temp+=1.0) {
+		show_temperature(temp);
+		__delay_cycles(100000);
+	}*/
+	
 	// Globally enable interrupts
 	//_BIS_SR(GIE);
 
-	for (float temp = 2.5; temp < 40.0; temp+=1.0) {
-		show_temperature(temp);
-		__delay_cycles(100000);
-	}
-
 	// Go to LPM4
-	LPM4;
+	//LPM4;
 
 	// Loop forever
-	while(1);
+	while(1){
+			// Get temp and print
+			float temperature = ds_get_temperature(); 
+			// Print a debug string
+			char string [6];
+			sprintf(string, "%u.%02u", (int) temperature, (int) ((temperature - (float)((int)(temperature))) * 100));
+			uart_tx_string("Temperature: ");
+			uart_tx_string(string);
+			uart_tx_string("\r\n");
+			__delay_cycles(10000);
+	}
 }
 
 // Semaphore-ish variable that stores, whether or not the device is just
@@ -335,9 +348,6 @@ static void __attribute__((__interrupt__(PORT1_VECTOR))) p1_isr(void) {
 			// Wake up
 			LPM4_EXIT;
 			is_inactive = 0;
-			
-			// Activate LED
-			P1OUT |= LED2;
 
 			// Get temp and print
 			float temperature = ds_get_temperature(); 
@@ -357,8 +367,6 @@ static void __attribute__((__interrupt__(PORT1_VECTOR))) p1_isr(void) {
 
 // ISR for TimerA0
 static void __attribute__((__interrupt__(TIMER1_A0_VECTOR))) ta0_isr(void) {
-	// Disable LED2
-	P1OUT &= ~LED2;
 	// Disable timer
 	TACCR0 = 0;
 	// Deactivate stuff
