@@ -23,7 +23,7 @@
 #define BUTTON BIT3
 
 // Timer definitions
-#define TIMER_DELAY (6249) // Equal to 0.5 seconds
+#define TIMER_DELAY (62499) // Equal to 0.5 seconds
 #define ENABLE_TIMER (TASSEL_2 | ID_3 | MC_1 |TACLR)
 
 // Some magic numbers
@@ -257,8 +257,8 @@ static void show_temperature(float temp) {
 			YEAST_KVEIK_PORT &= ~YEAST_KVEIK_BIT;
 			RANGE_HIGH_PORT &= ~RANGE_HIGH_BIT;
 			TEMP_HIGH_PORT &= ~TEMP_HIGH_BIT;
-		__delay_cycles(10000);
-	}
+			__delay_cycles(10000);
+		}
 	}
 
 }
@@ -268,11 +268,10 @@ int main (void)
 	// Disable WD timer
 	WDTCTL = WDTPW + WDTHOLD;
 
-	// TODO: Clock down
 	// Set clocks
-	BCSCTL1 = 0;//CALBC1_1MHZ;
-	DCOCTL = 0; //CALDCO_1MHZ;
-	
+	BCSCTL1 = CALBC1_1MHZ;
+	DCOCTL = CALDCO_1MHZ;
+
 	// Make button pin input
 	P1DIR &= ~BUTTON;
 	// Enable pull-up resistor
@@ -295,7 +294,7 @@ int main (void)
 	// Set clock
 	UCA0CTL1 |= UCSSEL_2;
 	// Set 9600 baud at 1MHz
-	UCA0BR0 = 0x0A;
+	UCA0BR0 = 104;
 	UCA0BR1 = 0;
 	// Set modulation
 	UCA0MCTL = UCBRS0;
@@ -304,32 +303,20 @@ int main (void)
 
 	// Make all temperature pins outputs
 	P1DIR |= TEMPLEDS_P1;
- 	P2DIR |= TEMPLEDS_P2;	
-	
+	P2DIR |= TEMPLEDS_P2;
 
-	/*for (float temp = 2.5; temp < 40.0; temp+=1.0) {
-		show_temperature(temp);
-		__delay_cycles(100000);
-	}*/
-	
+	// Turn the Pins off
+	P1OUT &= ~TEMPLEDS_P1;
+	P2OUT &= ~TEMPLEDS_P2;
+
 	// Globally enable interrupts
-	//_BIS_SR(GIE);
+	_BIS_SR(GIE);
 
 	// Go to LPM4
-	//LPM4;
+	LPM4;
 
 	// Loop forever
-	while(1){
-			// Get temp and print
-			float temperature = ds_get_temperature(); 
-			// Print a debug string
-			char string [6];
-			sprintf(string, "%u.%02u", (int) temperature, (int) ((temperature - (float)((int)(temperature))) * 100));
-			uart_tx_string("Temperature: ");
-			uart_tx_string(string);
-			uart_tx_string("\r\n");
-			__delay_cycles(10000);
-	}
+	while(1);
 }
 
 // Semaphore-ish variable that stores, whether or not the device is just
@@ -351,6 +338,7 @@ static void __attribute__((__interrupt__(PORT1_VECTOR))) p1_isr(void) {
 
 			// Get temp and print
 			float temperature = ds_get_temperature(); 
+			show_temperature(temperature);
 			// Print a debug string
 			char string [6];
 			sprintf(string, "%u.%02u", (int) temperature, (int) ((temperature - (float)((int)(temperature))) * 100));
@@ -371,6 +359,9 @@ static void __attribute__((__interrupt__(TIMER1_A0_VECTOR))) ta0_isr(void) {
 	TACCR0 = 0;
 	// Deactivate stuff
 	is_inactive = 1;
+	// Turn the Pins off
+	P1OUT &= ~TEMPLEDS_P1;
+	P2OUT &= ~TEMPLEDS_P2;
 	// And go back to LPM4
 	LPM4;
 }
